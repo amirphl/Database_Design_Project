@@ -1,3 +1,5 @@
+#-------------------------- views for query 1
+
 CREATE VIEW S(shopId, productId, total) AS
   (SELECT
      C.shopId,
@@ -92,5 +94,21 @@ CREATE VIEW H5 (shopId, productId, total) AS (
                      WHERE M4.shopId = U.shopId)
 );
 
-#--------------------------
+#-------------------------- views for query 2
 
+CREATE VIEW Rejected1(customerUsername, phone_number) AS (
+  SELECT
+    C.customerUsername,
+    C.phone_number
+  FROM customerorders AS C
+  WHERE C.status = 'rejected'
+);
+
+CREATE VIEW Rejected2(customerEmail, phone_number) AS (
+  SELECT
+    C.customerEmail,
+    T.phone_number
+  FROM temporarycustomerorders AS C
+    JOIN temporarycustomers AS T ON C.customerEmail = T.email
+  WHERE C.status = 'rejected'
+);
