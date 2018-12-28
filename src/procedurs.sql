@@ -137,10 +137,12 @@ CREATE PROCEDURE deliver_customer_order_to_transmitter(IN oid INT, # orderId
       UPDATE customerorders AS C
       SET status = 'sending'
       WHERE C.id = oid;
+
+      INSERT INTO shipment (transmitterId, orderId) VALUES (@transmitter, oid);
     END IF;
   END;
 
-CREATE PROCEDURE deliver_temporary_customer_order_to_transmitter(IN oid INT, # id of order
+CREATE PROCEDURE deliver_temporary_customer_order_to_transmitter(IN oid INT, # orderId
                                                                  IN sh  CHAR(20) # shopId
 )
   BEGIN
@@ -162,6 +164,8 @@ CREATE PROCEDURE deliver_temporary_customer_order_to_transmitter(IN oid INT, # i
       UPDATE temporarycustomerorders AS C
       SET status = 'sending'
       WHERE C.id = oid;
+
+      INSERT INTO temporaryshipment (transmitterId, orderId) VALUES (@transmitter, oid);
     END IF;
   END;
 
