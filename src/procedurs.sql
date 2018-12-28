@@ -36,8 +36,8 @@ CREATE PROCEDURE update_customer(IN us VARCHAR(100), #username
   END;
 
 CREATE PROCEDURE add_order_by_customer(IN cu VARCHAR(100), #customerUsername
-                                       IN sh CHAR(20), #shop id
-                                       IN pr CHAR(20), # product id
+                                       IN sh CHAR(20), #shopId
+                                       IN pr CHAR(20), # productId
                                        IN va INTEGER, # value
                                        IN pa ENUM ('online', 'offline'), # payment_type
                                        IN ad VARCHAR(200), # address
@@ -78,23 +78,21 @@ CREATE PROCEDURE add_order_by_customer(IN cu VARCHAR(100), #customerUsername
       SET P.value = P.value - va
       WHERE P.id = pr AND P.shopId = sh;
 
-      INSERT INTO customerorders (customerUsername, shopId, productId, value, status, payment_type, address)
-        VALUE (cu, sh, pr, va, 'rejected', pa, ad);
+      INSERT INTO customerorders (customerUsername, shopId, productId, value, payment_type, address, phone_number)
+        VALUE (cu, sh, pr, va, pa, ad, ph);
     END IF;
   END;
 
 CREATE PROCEDURE add_order_by_temporary_customer(IN cu VARCHAR(150), #customerEmail
                                                  IN sh CHAR(20), #shop id
                                                  IN pr CHAR(20), # product id
-                                                 IN va INTEGER, # value
-                                                 IN ad VARCHAR(200) # address
+                                                 IN va INTEGER # value
 )
   BEGIN
 
     SELECT @valu := P.value
     FROM product AS P
     WHERE P.shopId = sh AND P.id = pr;
-
 
     SELECT @shop_start_time := S.start_time
     FROM shop AS S
@@ -106,18 +104,18 @@ CREATE PROCEDURE add_order_by_temporary_customer(IN cu VARCHAR(150), #customerEm
 
     IF @shop_start_time <= current_time AND current_time <= @shop_end_time AND @valu >= va
     THEN
-      INSERT INTO temporarycustomerorders (customerEmail, shopId, productId, value, address)
-        VALUE (cu, sh, pr, va, ad);
+      INSERT INTO temporarycustomerorders (customerEmail, shopId, productId, value)
+        VALUE (cu, sh, pr, va);
       UPDATE product AS P
       SET P.value = P.value - va
       WHERE P.id = pr AND P.shopId = sh;
     ELSE
-      INSERT INTO temporarycustomerorders (customerEmail, shopId, productId, value, status, address)
-        VALUE (cu, sh, pr, va, 'rejected', ad);
+      INSERT INTO temporarycustomerorders (customerEmail, shopId, productId, value, status)
+        VALUE (cu, sh, pr, va, 'rejected');
     END IF;
   END;
 
-CREATE PROCEDURE deliver_customer_order_to_transmitter(IN oid INT, # id of order
+CREATE PROCEDURE deliver_customer_order_to_transmitter(IN oid INT, # orderId
                                                        IN sh  CHAR(20) # shopId
 )
   BEGIN
