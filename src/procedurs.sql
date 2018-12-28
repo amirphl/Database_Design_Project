@@ -44,7 +44,15 @@ CREATE PROCEDURE add_order_by_customer(IN cu VARCHAR(100), #customerUsername
                                        IN ph VARCHAR(14) # phone_number
 )
   BEGIN
+    DECLARE `_rollback` BOOL DEFAULT 0;
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET `_rollback` = 1;
+    START TRANSACTION;
+
     SELECT @pri := P.price
+    FROM product AS P
+    WHERE P.shopId = sh AND P.id = pr;
+
+    SELECT @offe := P.offer
     FROM product AS P
     WHERE P.shopId = sh AND P.id = pr;
 
@@ -64,14 +72,15 @@ CREATE PROCEDURE add_order_by_customer(IN cu VARCHAR(100), #customerUsername
     FROM shop AS S
     WHERE S.id = sh;
 
-    IF @valu < va OR @cu_cred < @pri * va OR @shop_start_time > current_time OR current_time > @shop_end_time
+    IF @valu < va OR @cu_cred < ((1.0 - @offe) * @pri * va) OR @shop_start_time > current_time OR
+       current_time > @shop_end_time
     THEN
       INSERT INTO customerorders (customerUsername, shopId, productId, value, status, payment_type, address, phone_number)
         VALUE (cu, sh, pr, va, 'rejected', pa, ad, ph);
     ELSE
 
       UPDATE customers AS C
-      SET C.credit = C.credit - pri
+      SET C.credit = C.credit - (1.0 - @offe) * @pri * va
       WHERE C.username = cu AND pa = 'online';
 
       UPDATE product AS P
@@ -81,6 +90,13 @@ CREATE PROCEDURE add_order_by_customer(IN cu VARCHAR(100), #customerUsername
       INSERT INTO customerorders (customerUsername, shopId, productId, value, payment_type, address, phone_number)
         VALUE (cu, sh, pr, va, pa, ad, ph);
     END IF;
+
+    IF `_rollback`
+    THEN
+      ROLLBACK;
+    ELSE
+      COMMIT;
+    END IF;
   END;
 
 CREATE PROCEDURE add_order_by_temporary_customer(IN cu VARCHAR(150), #customerEmail
@@ -89,6 +105,9 @@ CREATE PROCEDURE add_order_by_temporary_customer(IN cu VARCHAR(150), #customerEm
                                                  IN va INTEGER # value
 )
   BEGIN
+    DECLARE `_rollback` BOOL DEFAULT 0;
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET `_rollback` = 1;
+    START TRANSACTION;
 
     SELECT @valu := P.value
     FROM product AS P
@@ -112,6 +131,13 @@ CREATE PROCEDURE add_order_by_temporary_customer(IN cu VARCHAR(150), #customerEm
     ELSE
       INSERT INTO temporarycustomerorders (customerEmail, shopId, productId, value, status)
         VALUE (cu, sh, pr, va, 'rejected');
+    END IF;
+
+    IF `_rollback`
+    THEN
+      ROLLBACK;
+    ELSE
+      COMMIT;
     END IF;
   END;
 
