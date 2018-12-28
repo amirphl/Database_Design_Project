@@ -178,6 +178,18 @@ CREATE PROCEDURE deliver_to_customer(IN oid INT, # orderId
     WHERE T.id = tid;
   END;
 
+CREATE PROCEDURE charge_account(IN us VARCHAR(100), #username
+                                IN cr INT UNSIGNED #credit
+)
+  BEGIN
+    IF cr > 0
+    THEN
+      UPDATE customers
+      SET credit = credit + cr
+      WHERE username = us;
+    END IF;
+  END;
+
 
 
 
