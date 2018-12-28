@@ -8,8 +8,17 @@ CREATE PROCEDURE add_customer(IN us VARCHAR(100), #username
                               IN cr INT UNSIGNED # credit
 )
   BEGIN
+    DECLARE `_rollback` BOOL DEFAULT 0;
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET `_rollback` = 1;
+    START TRANSACTION;
     INSERT INTO customers (username, password, email, first_name, last_name, postal_code, gender, credit)
     VALUES (us, sha2(pa, 256), em, fi, la, po, ge, cr);
+    IF `_rollback`
+    THEN
+      ROLLBACK;
+    ELSE
+      COMMIT;
+    END IF;
   END;
 
 CREATE PROCEDURE update_customer(IN us VARCHAR(100), #username
