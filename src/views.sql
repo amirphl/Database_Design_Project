@@ -128,3 +128,42 @@ CREATE VIEW CustomersAverage(average) AS (
     JOIN product AS P ON T.productId = P.id AND T.shopId = P.shopId
   WHERE status != 'rejected'
 );
+
+#-------------------------- views for query 4
+
+CREATE VIEW TransmitterSum_1(id, total) AS (
+  SELECT
+    S.transmitterId,
+    sum(C.value * P.price)
+  FROM (shipment AS S
+    JOIN customerorders AS C ON S.orderId = C.id) JOIN product AS P ON C.productId = P.id
+  GROUP BY S.transmitterId
+);
+
+CREATE VIEW TransmitterSum_2(id, total) AS (
+  SELECT
+    S.transmitterId,
+    sum(C.value * P.price)
+  FROM (temporaryshipment AS S
+    JOIN temporarycustomerorders AS C ON S.orderId = C.id) JOIN product AS P ON C.productId = P.id
+  GROUP BY S.transmitterId
+);
+
+CREATE VIEW TransmitterAverageAll(id, average) AS (
+  SELECT
+    R.id,
+    avg(R.total)
+  FROM
+    (SELECT
+       id,
+       total
+     FROM TransmitterSum_1
+     UNION ALL
+     SELECT
+       id,
+       total
+     FROM TransmitterSum_2) AS R
+  GROUP BY R.id
+);
+
+
