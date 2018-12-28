@@ -112,3 +112,19 @@ CREATE VIEW Rejected2(customerEmail, phone_number) AS (
     JOIN temporarycustomers AS T ON C.customerEmail = T.email
   WHERE C.status = 'rejected'
 );
+
+#-------------------------- views for query 3
+
+CREATE VIEW TemporaryCustomersAverage(average) AS (
+  SELECT avg(T.value * P.price)
+  FROM temporarycustomerorders AS T
+    JOIN product AS P ON T.productId = P.id AND T.shopId = P.shopId
+  WHERE status != 'rejected'
+);
+
+CREATE VIEW CustomersAverage(average) AS (
+  SELECT avg(T.value * P.price)
+  FROM Customerorders AS T
+    JOIN product AS P ON T.productId = P.id AND T.shopId = P.shopId
+  WHERE status != 'rejected'
+);
