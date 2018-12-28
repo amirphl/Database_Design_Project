@@ -183,9 +183,9 @@ CREATE PROCEDURE deliver_to_customer(IN oid INT, # orderId
     WHERE C.id = oid;
 
     UPDATE transmitters AS T
-    SET T.credit = T.credit + 0.05 * (SELECT P.price
-                                      FROM product AS P
-                                      WHERE P.id = @pid)
+    SET T.status = 'free', T.credit = T.credit + 0.05 * (SELECT P.price
+                                                         FROM product AS P
+                                                         WHERE P.id = @pid)
     WHERE T.id = tid;
   END;
 
