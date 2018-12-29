@@ -83,7 +83,7 @@ CREATE TABLE CustomerOrders (
   PRIMARY KEY (id),
   FOREIGN KEY (customerUsername) REFERENCES Customers (username),
   FOREIGN KEY (shopId) REFERENCES Shop (id),
-  FOREIGN KEY (productId) REFERENCES Product (id)
+  FOREIGN KEY (productId,shopId) REFERENCES Product (id,shopId)
 );
 
 CREATE TABLE TemporaryCustomerOrders (
@@ -97,7 +97,7 @@ CREATE TABLE TemporaryCustomerOrders (
   PRIMARY KEY (id),
   FOREIGN KEY (customerEmail) REFERENCES TemporaryCustomers (email),
   FOREIGN KEY (shopId) REFERENCES Shop (id),
-  FOREIGN KEY (productId) REFERENCES Product (id)
+  FOREIGN KEY (productId,shopId) REFERENCES Product (id,shopId)
 );
 
 CREATE TABLE Supporter (
