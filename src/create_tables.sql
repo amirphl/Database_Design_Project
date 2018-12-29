@@ -155,4 +155,12 @@ CREATE TABLE UpdateCustomerLog (
   dat      TIMESTAMP DEFAULT current_timestamp,
   PRIMARY KEY (username, dat),
   FOREIGN KEY (username) REFERENCES Customers (username)
+);
+
+CREATE TABLE UpdateTransmitterLog (
+  transmitterId CHAR(20),
+  dat           TIMESTAMP DEFAULT current_timestamp,
+  status        ENUM ('free', 'sending') NOT NULL,
+  PRIMARY KEY (transmitterId, dat),
+  FOREIGN KEY (transmitterId) REFERENCES Transmitters (id)
 )
