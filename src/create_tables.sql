@@ -147,3 +147,12 @@ CREATE TABLE TemporaryShipment (
   FOREIGN KEY (transmitterId) REFERENCES Transmitters (id),
   FOREIGN KEY (orderId) REFERENCES TemporaryCustomerOrders (id)
 );
+
+#------------- log tables
+
+CREATE TABLE UpdateCustomerLog (
+  username VARCHAR(100),
+  dat      TIMESTAMP DEFAULT current_timestamp,
+  PRIMARY KEY (username, dat),
+  FOREIGN KEY (username) REFERENCES Customers (username)
+)
