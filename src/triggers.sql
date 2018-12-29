@@ -32,3 +32,10 @@ FOR EACH ROW
   BEGIN
     INSERT INTO updatecustomerorderlog (orderId, dat, status) VALUES (NEW.id, current_timestamp, NEW.status);
   END;
+
+CREATE TRIGGER log_update_on_temporary_customer_orders
+AFTER UPDATE ON temporarycustomerorders
+FOR EACH ROW
+  BEGIN
+    INSERT INTO updatetemporarycustomerorderlog (orderId, dat, status) VALUES (NEW.id, current_timestamp, NEW.status);
+  END;
