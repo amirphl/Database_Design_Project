@@ -163,4 +163,13 @@ CREATE TABLE UpdateTransmitterLog (
   status        ENUM ('free', 'sending') NOT NULL,
   PRIMARY KEY (transmitterId, dat),
   FOREIGN KEY (transmitterId) REFERENCES Transmitters (id)
+);
+
+CREATE TABLE UpdateCustomerOrderLog (
+  orderId INT,
+  dat     TIMESTAMP DEFAULT current_timestamp,
+  status  ENUM ('accepted', 'rejected', 'sending', 'done'),
+  PRIMARY KEY (orderId, dat),
+  FOREIGN KEY (orderId) REFERENCES CustomerOrders (id)
 )
+
