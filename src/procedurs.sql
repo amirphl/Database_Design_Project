@@ -31,7 +31,7 @@ CREATE PROCEDURE update_customer(IN us VARCHAR(100), #username
 )
   BEGIN
     UPDATE customers
-    SET password = pa, email = em, first_name = fi, last_name = la, postal_code = po, gender = ge
+    SET password = sha2(pa, 256), email = em, first_name = fi, last_name = la, postal_code = po, gender = ge
     WHERE username = us;
   END;
 
