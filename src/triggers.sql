@@ -25,3 +25,10 @@ FOR EACH ROW
   BEGIN
     INSERT INTO updatetransmitterlog (transmitterId, dat, status) VALUES (NEW.id, current_timestamp, NEW.status);
   END;
+
+CREATE TRIGGER log_update_on_customer_orders
+AFTER UPDATE ON customerorders
+FOR EACH ROW
+  BEGIN
+    INSERT INTO updatecustomerorderlog (orderId, dat, status) VALUES (NEW.id, current_timestamp, NEW.status);
+  END;
