@@ -131,38 +131,23 @@ CREATE VIEW CustomersAverage(average) AS (
 
 #-------------------------- views for query 4
 
-CREATE VIEW TransmitterSum_1(id, total) AS (
-  SELECT
-    S.transmitterId,
-    sum(C.value * P.price)
-  FROM (shipment AS S
-    JOIN customerorders AS C ON S.orderId = C.id) JOIN product AS P ON C.productId = P.id
-  GROUP BY S.transmitterId
-);
-
-CREATE VIEW TransmitterSum_2(id, total) AS (
-  SELECT
-    S.transmitterId,
-    sum(C.value * P.price)
-  FROM (temporaryshipment AS S
-    JOIN temporarycustomerorders AS C ON S.orderId = C.id) JOIN product AS P ON C.productId = P.id
-  GROUP BY S.transmitterId
-);
-
 CREATE VIEW TransmitterAverageAll(id, average) AS (
   SELECT
     R.id,
-    avg(R.total)
+    avg(R.pr)
   FROM
-    (SELECT
-       id,
-       total
-     FROM TransmitterSum_1
+    (SELECT ALL
+       S.transmitterId   AS id,
+       C.value * P.price AS pr
+     FROM (temporaryshipment AS S
+       JOIN temporarycustomerorders AS C ON S.orderId = C.id) JOIN product AS P ON C.productId = P.id
      UNION ALL
      SELECT
-       id,
-       total
-     FROM TransmitterSum_2) AS R
+       S.transmitterId   AS id,
+       C.value * P.price AS pr
+     FROM (temporaryshipment AS S
+       JOIN temporarycustomerorders AS C ON S.orderId = C.id) JOIN product AS P ON C.productId = P.id
+    ) AS R
   GROUP BY R.id
 );
 
