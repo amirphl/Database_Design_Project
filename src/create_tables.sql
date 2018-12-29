@@ -171,5 +171,13 @@ CREATE TABLE UpdateCustomerOrderLog (
   status  ENUM ('accepted', 'rejected', 'sending', 'done'),
   PRIMARY KEY (orderId, dat),
   FOREIGN KEY (orderId) REFERENCES CustomerOrders (id)
+);
+
+CREATE TABLE UpdateTemporaryCustomerOrderLog (
+  orderId INT,
+  dat     TIMESTAMP DEFAULT current_timestamp,
+  status  ENUM ('accepted', 'rejected', 'sending', 'done'),
+  PRIMARY KEY (orderId, dat),
+  FOREIGN KEY (orderId) REFERENCES CustomerOrders (id)
 )
 
