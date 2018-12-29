@@ -74,16 +74,12 @@ CREATE TABLE CustomerOrders (
   dat              TIMESTAMP DEFAULT current_timestamp                                                         NOT NULL,
   address          VARCHAR(200)                                                                                NOT NULL,
   phone_number     VARCHAR(14)                                                                                 NOT NULL,
-  CHECK (address IN (SELECT CA.address
-                     FROM CustomerAddresses AS CA
-                     WHERE customerUsername = CA.CustomerUsername)),
-  CHECK (phone_number IN (SELECT CP.phone_number
-                          FROM CustomerPhoneNumbers AS CP
-                          WHERE customerUsername = CP.CustomerUsername)),
   PRIMARY KEY (id),
   FOREIGN KEY (customerUsername) REFERENCES Customers (username),
   FOREIGN KEY (shopId) REFERENCES Shop (id),
-  FOREIGN KEY (productId,shopId) REFERENCES Product (id,shopId)
+  FOREIGN KEY (productId, shopId) REFERENCES Product (id, shopId),
+  FOREIGN KEY (customerUsername, address) REFERENCES CustomerAddresses (customerUsername, address),
+  FOREIGN KEY (customerUsername, phone_number) REFERENCES CustomerPhoneNumbers (customerUsername, phone_number)
 );
 
 CREATE TABLE TemporaryCustomerOrders (
@@ -97,7 +93,7 @@ CREATE TABLE TemporaryCustomerOrders (
   PRIMARY KEY (id),
   FOREIGN KEY (customerEmail) REFERENCES TemporaryCustomers (email),
   FOREIGN KEY (shopId) REFERENCES Shop (id),
-  FOREIGN KEY (productId,shopId) REFERENCES Product (id,shopId)
+  FOREIGN KEY (productId, shopId) REFERENCES Product (id, shopId)
 );
 
 CREATE TABLE Supporter (
@@ -179,5 +175,5 @@ CREATE TABLE UpdateTemporaryCustomerOrderLog (
   status  ENUM ('accepted', 'rejected', 'sending', 'done'),
   PRIMARY KEY (orderId, dat),
   FOREIGN KEY (orderId) REFERENCES CustomerOrders (id)
-)
+);
 
