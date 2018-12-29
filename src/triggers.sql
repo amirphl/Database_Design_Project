@@ -18,3 +18,10 @@ FOR EACH ROW
   BEGIN
     INSERT INTO updatecustomerlog (username, dat) VALUES (NEW.username, current_timestamp);
   END;
+
+CREATE TRIGGER log_update_on_transmitters
+AFTER UPDATE ON transmitters
+FOR EACH ROW
+  BEGIN
+    INSERT INTO updatetransmitterlog (transmitterId, dat, status) VALUES (NEW.id, current_timestamp, NEW.status);
+  END;
