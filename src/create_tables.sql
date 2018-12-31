@@ -1,9 +1,6 @@
-# CREATE DATABASE OnlineStore;
-# USE OnlineStore;
-
 CREATE TABLE Customers (
   username    VARCHAR(100) PRIMARY KEY,
-  password    VARCHAR(30),
+  password    VARCHAR(512),
   email       VARCHAR(150) NOT NULL,
   first_name  VARCHAR(100),
   last_name   VARCHAR(100),
