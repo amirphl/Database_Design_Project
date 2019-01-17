@@ -1,5 +1,5 @@
 #-------------------------- views for query 1
-
+USE store;
 CREATE VIEW S(shopId, productId, total) AS
   (SELECT
      C.shopId,
@@ -139,14 +139,18 @@ CREATE VIEW TransmitterAverageAll(id, average) AS (
     (SELECT ALL
        S.transmitterId   AS id,
        C.value * P.price AS pr
-     FROM (temporaryshipment AS S
-       JOIN temporarycustomerorders AS C ON S.orderId = C.id) JOIN product AS P ON C.productId = P.id
+     FROM (shipment AS S
+       JOIN customerorders AS C
+         ON S.purchase_time = C.purchase_time AND S.customerUsername = C.customerUsername AND S.shopId = C.shopId AND
+            S.productId = C.productId) JOIN product AS P ON C.productId = P.id
      UNION ALL
      SELECT
        S.transmitterId   AS id,
        C.value * P.price AS pr
      FROM (temporaryshipment AS S
-       JOIN temporarycustomerorders AS C ON S.orderId = C.id) JOIN product AS P ON C.productId = P.id
+       JOIN temporarycustomerorders AS C
+         ON S.purchase_time = C.purchase_time AND S.customerEmail = C.customerEmail AND S.shopId = C.shopId AND
+            S.productId = C.productId) JOIN product AS P ON C.productId = P.id
     ) AS R
   GROUP BY R.id
 );
