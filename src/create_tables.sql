@@ -1,3 +1,4 @@
+USE store;
 CREATE TABLE Customers (
   username    VARCHAR(100) PRIMARY KEY,
   password    VARCHAR(512),
@@ -6,8 +7,7 @@ CREATE TABLE Customers (
   last_name   VARCHAR(100),
   postal_code CHAR(10)     NOT NULL,
   gender      ENUM ('man', 'woman'),
-  credit      INT UNSIGNED NOT NULL DEFAULT 0,
-  CHECK (credit >= 0)
+  credit      INT UNSIGNED NOT NULL DEFAULT 0
 );
 
 CREATE TABLE TemporaryCustomers (
@@ -38,7 +38,7 @@ CREATE TABLE CustomerPhoneNumbers (
 );
 
 CREATE TABLE Shop (
-  id           CHAR(20) PRIMARY KEY,
+  id           INT UNSIGNED PRIMARY KEY,
   title        VARCHAR(100) NOT NULL,
   city         VARCHAR(100),
   address      VARCHAR(200) NOT NULL,
@@ -49,8 +49,8 @@ CREATE TABLE Shop (
 );
 
 CREATE TABLE Product (
-  id     CHAR(20),
-  shopId CHAR(20),
+  id     INT UNSIGNED,
+  shopId INT UNSIGNED,
   title  VARCHAR(100)               NOT NULL,
   price  INTEGER UNSIGNED           NOT NULL,
   value  INTEGER UNSIGNED DEFAULT 1 NOT NULL,
@@ -61,17 +61,17 @@ CREATE TABLE Product (
 );
 
 CREATE TABLE CustomerOrders (
-  id               INT AUTO_INCREMENT,
+  purchase_time    TIMESTAMP DEFAULT current_timestamp,
   customerUsername VARCHAR(100),
-  shopId           CHAR(20),
-  productId        CHAR(20),
+  shopId           INT UNSIGNED,
+  productId        INT UNSIGNED,
   value            INTEGER UNSIGNED DEFAULT 1                                                                  NOT NULL,
   status           ENUM ('accepted', 'rejected', 'sending', 'done') DEFAULT 'accepted'                         NOT NULL,
   payment_type     ENUM ('online', 'offline') DEFAULT 'online'                                                 NOT NULL,
   dat              TIMESTAMP DEFAULT current_timestamp                                                         NOT NULL,
   address          VARCHAR(200)                                                                                NOT NULL,
   phone_number     VARCHAR(14)                                                                                 NOT NULL,
-  PRIMARY KEY (id),
+  PRIMARY KEY (purchase_time, customerUsername, shopId, productId),
   FOREIGN KEY (customerUsername) REFERENCES Customers (username),
   FOREIGN KEY (shopId) REFERENCES Shop (id),
   FOREIGN KEY (productId, shopId) REFERENCES Product (id, shopId),
@@ -80,22 +80,22 @@ CREATE TABLE CustomerOrders (
 );
 
 CREATE TABLE TemporaryCustomerOrders (
-  id            INT AUTO_INCREMENT,
+  purchase_time TIMESTAMP DEFAULT current_timestamp,
   customerEmail VARCHAR(150),
-  shopId        CHAR(20),
-  productId     CHAR(20),
+  shopId        INT UNSIGNED,
+  productId     INT UNSIGNED,
   value         INTEGER UNSIGNED DEFAULT 1                                           NOT NULL,
   status        ENUM ('accepted', 'rejected', 'sending', 'done') DEFAULT 'accepted'  NOT NULL,
   dat           TIMESTAMP DEFAULT current_timestamp                                  NOT NULL,
-  PRIMARY KEY (id),
+  PRIMARY KEY (purchase_time, customerEmail, shopId, productId),
   FOREIGN KEY (customerEmail) REFERENCES TemporaryCustomers (email),
   FOREIGN KEY (shopId) REFERENCES Shop (id),
   FOREIGN KEY (productId, shopId) REFERENCES Product (id, shopId)
 );
 
 CREATE TABLE Supporter (
-  id           CHAR(20),
-  shopId       CHAR(20),
+  id           INT UNSIGNED,
+  shopId       INT UNSIGNED,
   first_name   VARCHAR(100),
   last_name    VARCHAR(100),
   address      VARCHAR(200) NOT NULL,
@@ -105,8 +105,8 @@ CREATE TABLE Supporter (
 );
 
 CREATE TABLE Operators (
-  id         CHAR(20),
-  shopId     CHAR(20),
+  id         INT UNSIGNED,
+  shopId     INT UNSIGNED,
   first_name VARCHAR(100),
   last_name  VARCHAR(100),
   PRIMARY KEY (id, shopId),
@@ -114,8 +114,8 @@ CREATE TABLE Operators (
 );
 
 CREATE TABLE Transmitters (
-  id           CHAR(20),
-  shopId       CHAR(20),
+  id           INT UNSIGNED,
+  shopId       INT UNSIGNED,
   first_name   VARCHAR(100),
   last_name    VARCHAR(100),
   phone_number VARCHAR(14)                                NOT NULL,
@@ -126,51 +126,57 @@ CREATE TABLE Transmitters (
 );
 
 CREATE TABLE Shipment (
-  transmitterId CHAR(20),
-  orderId       INT,
-  PRIMARY KEY (transmitterId, orderId),
-  FOREIGN KEY (transmitterId) REFERENCES Transmitters (id),
-  FOREIGN KEY (orderId) REFERENCES CustomerOrders (id)
+  transmitterId    INT UNSIGNED,
+  purchase_time    TIMESTAMP,
+  customerUsername VARCHAR(100),
+  shopId           INT UNSIGNED,
+  productId        INT UNSIGNED,
+  PRIMARY KEY (transmitterId, purchase_time, customerUsername, shopId, productId),
+  FOREIGN KEY (transmitterId, shopId) REFERENCES Transmitters (id, shopId),
+  FOREIGN KEY (purchase_time, customerUsername, shopId, productId) REFERENCES CustomerOrders (purchase_time, customerUsername, shopId, productId)
 );
 
 CREATE TABLE TemporaryShipment (
-  transmitterId CHAR(20),
-  orderId       INT,
-  PRIMARY KEY (transmitterId, orderId),
-  FOREIGN KEY (transmitterId) REFERENCES Transmitters (id),
-  FOREIGN KEY (orderId) REFERENCES TemporaryCustomerOrders (id)
+  transmitterId INT UNSIGNED,
+  purchase_time TIMESTAMP,
+  customerEmail VARCHAR(150),
+  shopId        INT UNSIGNED,
+  productId     INT UNSIGNED,
+  PRIMARY KEY (transmitterId, purchase_time, customerEmail, shopId, productId),
+  FOREIGN KEY (transmitterId, shopId) REFERENCES Transmitters (id, shopId),
+  FOREIGN KEY (purchase_time, customerEmail, shopId, productId) REFERENCES TemporaryCustomerOrders (purchase_time, customerEmail, shopId, productId)
 );
 
 #------------- log tables
 
-CREATE TABLE UpdateCustomerLog (
-  username VARCHAR(100),
-  dat      TIMESTAMP DEFAULT current_timestamp,
-  PRIMARY KEY (username, dat),
-  FOREIGN KEY (username) REFERENCES Customers (username)
-);
-
-CREATE TABLE UpdateTransmitterLog (
-  transmitterId CHAR(20),
-  dat           TIMESTAMP DEFAULT current_timestamp,
-  status        ENUM ('free', 'sending') NOT NULL,
-  PRIMARY KEY (transmitterId, dat),
-  FOREIGN KEY (transmitterId) REFERENCES Transmitters (id)
-);
-
-CREATE TABLE UpdateCustomerOrderLog (
-  orderId INT,
-  dat     TIMESTAMP DEFAULT current_timestamp,
-  status  ENUM ('accepted', 'rejected', 'sending', 'done'),
-  PRIMARY KEY (orderId, dat),
-  FOREIGN KEY (orderId) REFERENCES CustomerOrders (id)
-);
-
-CREATE TABLE UpdateTemporaryCustomerOrderLog (
-  orderId INT,
-  dat     TIMESTAMP DEFAULT current_timestamp,
-  status  ENUM ('accepted', 'rejected', 'sending', 'done'),
-  PRIMARY KEY (orderId, dat),
-  FOREIGN KEY (orderId) REFERENCES TemporaryCustomerOrders (id)
-);
+# CREATE TABLE UpdateCustomerLog (
+#   username VARCHAR(100),
+#   dat      TIMESTAMP DEFAULT current_timestamp,
+#   PRIMARY KEY (username, dat),
+#   FOREIGN KEY (username) REFERENCES Customers (username)
+# );
+#
+# CREATE TABLE UpdateTransmitterLog (
+#   transmitterId CHAR(20),
+#   dat           TIMESTAMP DEFAULT current_timestamp,
+#   status        ENUM ('free', 'sending') NOT NULL,
+#   PRIMARY KEY (transmitterId, dat),
+#   FOREIGN KEY (transmitterId) REFERENCES Transmitters (id)
+# );
+#
+# CREATE TABLE UpdateCustomerOrderLog (
+#   orderId INT,
+#   dat     TIMESTAMP DEFAULT current_timestamp,
+#   status  ENUM ('accepted', 'rejected', 'sending', 'done'),
+#   PRIMARY KEY (orderId, dat),
+#   FOREIGN KEY (orderId) REFERENCES CustomerOrders (id)
+# );
+#
+# CREATE TABLE UpdateTemporaryCustomerOrderLog (
+#   orderId INT,
+#   dat     TIMESTAMP DEFAULT current_timestamp,
+#   status  ENUM ('accepted', 'rejected', 'sending', 'done'),
+#   PRIMARY KEY (orderId, dat),
+#   FOREIGN KEY (orderId) REFERENCES TemporaryCustomerOrders (id)
+# );
 
