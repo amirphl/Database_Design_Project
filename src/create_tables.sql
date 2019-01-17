@@ -149,34 +149,48 @@ CREATE TABLE TemporaryShipment (
 
 #------------- log tables
 
-# CREATE TABLE UpdateCustomerLog (
-#   username VARCHAR(100),
-#   dat      TIMESTAMP DEFAULT current_timestamp,
-#   PRIMARY KEY (username, dat),
-#   FOREIGN KEY (username) REFERENCES Customers (username)
-# );
-#
-# CREATE TABLE UpdateTransmitterLog (
-#   transmitterId CHAR(20),
-#   dat           TIMESTAMP DEFAULT current_timestamp,
-#   status        ENUM ('free', 'sending') NOT NULL,
-#   PRIMARY KEY (transmitterId, dat),
-#   FOREIGN KEY (transmitterId) REFERENCES Transmitters (id)
-# );
-#
-# CREATE TABLE UpdateCustomerOrderLog (
-#   orderId INT,
-#   dat     TIMESTAMP DEFAULT current_timestamp,
-#   status  ENUM ('accepted', 'rejected', 'sending', 'done'),
-#   PRIMARY KEY (orderId, dat),
-#   FOREIGN KEY (orderId) REFERENCES CustomerOrders (id)
-# );
-#
-# CREATE TABLE UpdateTemporaryCustomerOrderLog (
-#   orderId INT,
-#   dat     TIMESTAMP DEFAULT current_timestamp,
-#   status  ENUM ('accepted', 'rejected', 'sending', 'done'),
-#   PRIMARY KEY (orderId, dat),
-#   FOREIGN KEY (orderId) REFERENCES TemporaryCustomerOrders (id)
-# );
+CREATE TABLE UpdateCustomerLog (
+  username     VARCHAR(100),
+  pre_password VARCHAR(512),
+  new_password VARCHAR(512),
+  pre_email    VARCHAR(150) NOT NULL,
+  new_email    VARCHAR(150) NOT NULL,
+  pre_credit   INT UNSIGNED NOT NULL,
+  new_credit   INT UNSIGNED NOT NULL,
+  update_time  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (username, update_time),
+  FOREIGN KEY (username) REFERENCES Customers (username)
+);
 
+CREATE TABLE UpdateTransmitterLog (
+  transmitterId INT UNSIGNED,
+  dat           TIMESTAMP DEFAULT current_timestamp,
+  pre_status    ENUM ('free', 'sending') NOT NULL,
+  new_status    ENUM ('free', 'sending') NOT NULL,
+  PRIMARY KEY (transmitterId, dat),
+  FOREIGN KEY (transmitterId) REFERENCES Transmitters (id)
+);
+
+CREATE TABLE UpdateCustomerOrderLog (
+  purchase_time    TIMESTAMP,
+  customerUsername VARCHAR(100),
+  shopId           INT UNSIGNED,
+  productId        INT UNSIGNED,
+  dat              TIMESTAMP DEFAULT current_timestamp,
+  pre_status       ENUM ('accepted', 'rejected', 'sending', 'done'),
+  new_status       ENUM ('accepted', 'rejected', 'sending', 'done'),
+  PRIMARY KEY (purchase_time, customerUsername, shopId, productId, dat),
+  FOREIGN KEY (purchase_time, customerUsername, shopId, productId) REFERENCES CustomerOrders (purchase_time, customerUsername, shopId, productId)
+);
+
+CREATE TABLE UpdateTemporaryCustomerOrderLog (
+  purchase_time TIMESTAMP,
+  customerEmail VARCHAR(150),
+  shopId        INT UNSIGNED,
+  productId     INT UNSIGNED,
+  dat           TIMESTAMP DEFAULT current_timestamp,
+  pre_status    ENUM ('accepted', 'rejected', 'sending', 'done'),
+  new_status    ENUM ('accepted', 'rejected', 'sending', 'done'),
+  PRIMARY KEY (purchase_time, customerEmail, shopId, productId, dat),
+  FOREIGN KEY (purchase_time, customerEmail, shopId, productId) REFERENCES TemporaryCustomerOrders (purchase_time, customerEmail, shopId, productId)
+);
