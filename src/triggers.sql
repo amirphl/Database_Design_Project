@@ -170,32 +170,69 @@ FOR EACH ROW
     END IF;
   END//
 
-DELIMITER ;
+# CREATE TRIGGER check_user_editing_itself
+# BEFORE UPDATE ON customers
+# FOR EACH ROW
+#   BEGIN
+#     IF OLD.username != NEW.username
+#     THEN
+#       ROLLBACK;
+#     END IF;
+#   END
+//
 
-# CREATE TRIGGER log_update_on_customers
-# AFTER UPDATE ON customers
+
+CREATE TRIGGER log_update_on_customers
+AFTER UPDATE ON customers
+FOR EACH ROW
+  BEGIN
+    INSERT INTO updatecustomerlog (username, pre_email, new_email, pre_password, new_password, pre_credit, new_credit)
+    VALUES (NEW.username, OLD.email, NEW.email, OLD.password, NEW.password, OLD.credit, NEW.credit);
+  END//
+
+CREATE TRIGGER log_update_on_transmitters
+AFTER UPDATE ON transmitters
+FOR EACH ROW
+  BEGIN
+    INSERT INTO updatetransmitterlog (transmitterId, pre_status, new_status)
+    VALUES (NEW.id, OLD.status, NEW.status);
+  END//
+
+# CREATE TRIGGER check_just_status_changed
+# BEFORE UPDATE ON customerorders
 # FOR EACH ROW
 #   BEGIN
-#     INSERT INTO updatecustomerlog (username, dat) VALUES (NEW.username, current_timestamp);
-#   END;
-#
-# CREATE TRIGGER log_update_on_transmitters
-# AFTER UPDATE ON transmitters
+#     IF
+#     OLD.purchase_time != NEW.purchase_time OR OLD.customerUsername != NEW.customerUsername OR OLD.shopId != NEW.shopId
+#     OR OLD.productId != NEW.productId OR OLD.value != NEW.status OR OLD.payment_type != NEW.payment_type OR
+#     OLD.phone_number != NEW.phone_number OR OLD.address != NEW.address
+#     THEN ROLLBACK; END IF;
+#   END
+//
+
+CREATE TRIGGER log_update_on_customer_orders
+AFTER UPDATE ON customerorders
+FOR EACH ROW
+  BEGIN
+    INSERT INTO updatecustomerorderlog (purchase_time, customerUsername, shopId, productId, pre_status, new_status)
+    VALUES (NEW.purchase_time, NEW.customerUsername, NEW.shopId, NEW.productId, OLD.status, NEW.status);
+  END//
+
+# CREATE TRIGGER check_just_status_changed_for_temporary_customer_order
+# BEFORE UPDATE ON temporarycustomerorders
 # FOR EACH ROW
 #   BEGIN
-#     INSERT INTO updatetransmitterlog (transmitterId, dat, status) VALUES (NEW.id, current_timestamp, NEW.status);
-#   END;
-#
-# CREATE TRIGGER log_update_on_customer_orders
-# AFTER UPDATE ON customerorders
-# FOR EACH ROW
-#   BEGIN
-#     INSERT INTO updatecustomerorderlog (orderId, dat, status) VALUES (NEW.id, current_timestamp, NEW.status);
-#   END;
-#
-# CREATE TRIGGER log_update_on_temporary_customer_orders
-# AFTER UPDATE ON temporarycustomerorders
-# FOR EACH ROW
-#   BEGIN
-#     INSERT INTO updatetemporarycustomerorderlog (orderId, dat, status) VALUES (NEW.id, current_timestamp, NEW.status);
-#   END;
+#     IF
+#     OLD.purchase_time != NEW.purchase_time OR OLD.customerEmail != NEW.customerEmail OR OLD.shopId != NEW.shopId
+#     OR OLD.productId != NEW.productId OR OLD.value != NEW.status
+#     THEN ROLLBACK; END IF;
+#   END
+//
+
+CREATE TRIGGER log_update_on_temporary_customer_orders
+AFTER UPDATE ON temporarycustomerorders
+FOR EACH ROW
+  BEGIN
+    INSERT INTO updatetemporarycustomerorderlog (purchase_time, customerEmail, shopId, productId, pre_status, new_status)
+    VALUES (NEW.purchase_time, NEW.customerEmail, NEW.shopId, NEW.productId, OLD.status, NEW.status);
+  END//
