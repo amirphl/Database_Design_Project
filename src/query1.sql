@@ -1,3 +1,4 @@
+use store;
 SELECT DISTINCT *
 FROM (
        SELECT *

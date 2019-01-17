@@ -1,3 +1,4 @@
+use store;
 SELECT phone_number
 FROM rejected1
 UNION
