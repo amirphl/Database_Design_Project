@@ -129,7 +129,7 @@ CREATE TABLE Shipment (
   customerUsername VARCHAR(100),
   shopId           INT UNSIGNED,
   productId        INT UNSIGNED,
-  PRIMARY KEY (transmitterId, purchase_time, customerUsername, shopId, productId),
+  PRIMARY KEY (purchase_time, customerUsername, shopId, productId),
   FOREIGN KEY (transmitterId, shopId) REFERENCES Transmitters (id, shopId),
   FOREIGN KEY (purchase_time, customerUsername, shopId, productId) REFERENCES CustomerOrders (purchase_time, customerUsername, shopId, productId)
 );
@@ -140,7 +140,7 @@ CREATE TABLE TemporaryShipment (
   customerEmail VARCHAR(150),
   shopId        INT UNSIGNED,
   productId     INT UNSIGNED,
-  PRIMARY KEY (transmitterId, purchase_time, customerEmail, shopId, productId),
+  PRIMARY KEY (purchase_time, customerEmail, shopId, productId),
   FOREIGN KEY (transmitterId, shopId) REFERENCES Transmitters (id, shopId),
   FOREIGN KEY (purchase_time, customerEmail, shopId, productId) REFERENCES TemporaryCustomerOrders (purchase_time, customerEmail, shopId, productId)
 );
