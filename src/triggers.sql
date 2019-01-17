@@ -181,6 +181,13 @@ FOR EACH ROW
 #   END
 //
 
+CREATE TRIGGER hash_password
+BEFORE UPDATE ON customers
+FOR EACH ROW
+  BEGIN
+    SET NEW.password = sha1(NEW.password);
+  END//
+
 
 CREATE TRIGGER log_update_on_customers
 AFTER UPDATE ON customers
